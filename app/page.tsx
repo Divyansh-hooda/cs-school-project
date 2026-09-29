@@ -18,6 +18,7 @@ type Task = {
   initials: string
   tag: string
   completed?: string
+  completedTime?: string
 }
 
 const initialProjects = ['Website Relaunch', 'Mobile App v2', 'Q4 Marketing']
@@ -29,9 +30,9 @@ const initialTasks: Task[] = [
   { id: 3, title: 'Set up analytics tracking', project: 'Website Relaunch', status: 'todo', priority: 'Low', due: 'Oct 14', assignee: 'Sam Patel', initials: 'SP', tag: 'Development' },
   { id: 4, title: 'Design new navigation', project: 'Website Relaunch', status: 'progress', priority: 'High', due: 'Sep 28', overdue: true, assignee: 'Riley Morgan', initials: 'RM', tag: 'Design' },
   { id: 5, title: 'Migrate blog posts', project: 'Website Relaunch', status: 'progress', priority: 'Medium', due: 'Oct 8', assignee: 'Sam Patel', initials: 'SP', tag: 'Development' },
-  { id: 6, title: 'Define site goals', project: 'Website Relaunch', status: 'done', priority: 'Low', due: 'Sep 20', assignee: 'Alex Kim', initials: 'AK', tag: 'Strategy', completed: 'Sep 20' },
-  { id: 7, title: 'Choose hosting provider', project: 'Website Relaunch', status: 'done', priority: 'Medium', due: 'Sep 22', assignee: 'Sam Patel', initials: 'SP', tag: 'Infrastructure', completed: 'Sep 22' },
-  { id: 8, title: 'Create sitemap', project: 'Website Relaunch', status: 'done', priority: 'Low', due: 'Sep 24', assignee: 'Riley Morgan', initials: 'RM', tag: 'Research', completed: 'Sep 24' },
+  { id: 6, title: 'Define site goals', project: 'Website Relaunch', status: 'done', priority: 'Low', due: 'Sep 20', assignee: 'Alex Kim', initials: 'AK', tag: 'Strategy', completed: 'Sep 20', completedTime: '4:15 PM' },
+  { id: 7, title: 'Choose hosting provider', project: 'Website Relaunch', status: 'done', priority: 'Medium', due: 'Sep 22', assignee: 'Sam Patel', initials: 'SP', tag: 'Infrastructure', completed: 'Sep 22', completedTime: '11:40 AM' },
+  { id: 8, title: 'Create sitemap', project: 'Website Relaunch', status: 'done', priority: 'Low', due: 'Sep 24', assignee: 'Riley Morgan', initials: 'RM', tag: 'Research', completed: 'Sep 24', completedTime: '2:05 PM' },
 ]
 
 const statusLabels: Record<Status, string> = { todo: 'To Do', progress: 'In Progress', done: 'Done' }
@@ -69,7 +70,7 @@ export default function Page() {
 
   const moveTask = (status: Status) => {
     if (dragged === null) return
-    setTasks((current) => current.map((task) => task.id === dragged ? { ...task, status, completed: status === 'done' ? 'Today' : undefined } : task))
+    setTasks((current) => current.map((task) => task.id === dragged ? { ...task, status, completed: status === 'done' ? 'Today' : undefined, completedTime: status === 'done' ? new Date().toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' }) : undefined } : task))
     setDragged(null)
   }
 
@@ -147,7 +148,7 @@ export default function Page() {
         <div className="mt-7 grid items-stretch gap-6 xl:grid-cols-3">
           {(['todo', 'progress', 'done'] as Status[]).map((status) => {
             const columnTasks = visibleTasks.filter((task) => task.status === status)
-            return <section key={status} onDragOver={(event) => event.preventDefault()} onDrop={() => moveTask(status)} className="min-h-[530px] rounded-[17px] bg-[#ebe6da] p-5"><div className="mb-4 flex items-center justify-between"><h2 className="text-[16px] font-bold">{statusLabels[status]}</h2><span className="text-[16px] font-semibold text-[#4d5752]">{columnTasks.length}</span></div><div className="space-y-4">{columnTasks.map((task) => <article key={task.id} draggable onDragStart={() => setDragged(task.id)} className={`relative rounded-[15px] border border-[#ddd5c5] bg-white p-5 shadow-[0_1px_2px_rgba(30,30,20,.03)] ${status === 'done' ? 'bg-[#faf8f3]' : ''}`}>{status === 'done' && <button type="button" aria-label={`Delete ${task.title}`} onClick={() => deleteTask(task.id)} className="absolute right-4 top-4 rounded-md p-1 text-[#7a817c] hover:bg-[#f1ddd3] hover:text-[#a0440c]"><X size={16} /></button>}<h3 className={`text-[18px] font-bold leading-tight ${status === 'done' ? 'text-[#5b625e] line-through pr-6' : ''}`}>{task.title}</h3><div className="mt-4 flex items-center gap-2 text-[14px]"><span className={`rounded-full px-3 py-1 font-semibold ${task.priority === 'High' ? 'bg-[#f9ddcc] text-[#a0440c]' : task.priority === 'Medium' ? 'bg-[#f5ebbd] text-[#77600b]' : 'bg-[#dcebe5] text-[#286052]'}`}>{task.priority}</span>{status === 'done' ? <span className="text-[#4d5752]">Completed {task.completed}</span> : <span className={task.overdue ? 'font-semibold text-[#a0440c]' : 'text-[#4d5752]'}>{task.overdue && 'Overdue · '}{!task.overdue && 'Due '}{task.due}</span>}</div><div className="mt-5 flex items-center justify-between text-[14px] text-[#4d5752]"><span>{task.tag}</span><span className={`grid h-[34px] w-[34px] place-items-center rounded-full text-[12px] font-bold text-white ${task.initials === 'RM' ? 'bg-[#a13f08]' : 'bg-[#216656]'}`}>{task.initials}</span></div></article>)}</div></section>
+            return <section key={status} onDragOver={(event) => event.preventDefault()} onDrop={() => moveTask(status)} className="min-h-[530px] rounded-[17px] bg-[#ebe6da] p-5"><div className="mb-4 flex items-center justify-between"><h2 className="text-[16px] font-bold">{statusLabels[status]}</h2><span className="text-[16px] font-semibold text-[#4d5752]">{columnTasks.length}</span></div><div className="space-y-4">{columnTasks.map((task) => <article key={task.id} draggable onDragStart={() => setDragged(task.id)} className={`relative rounded-[15px] border border-[#ddd5c5] bg-white p-5 shadow-[0_1px_2px_rgba(30,30,20,.03)] ${status === 'done' ? 'bg-[#faf8f3]' : ''}`}>{status === 'done' && <button type="button" aria-label={`Delete ${task.title}`} onClick={() => deleteTask(task.id)} className="absolute right-4 top-4 rounded-md p-1 text-[#7a817c] hover:bg-[#f1ddd3] hover:text-[#a0440c]"><X size={16} /></button>}<h3 className={`text-[18px] font-bold leading-tight ${status === 'done' ? 'text-[#5b625e] line-through pr-6' : ''}`}>{task.title}</h3><div className="mt-4 flex items-center gap-2 text-[14px]"><span className={`rounded-full px-3 py-1 font-semibold ${task.priority === 'High' ? 'bg-[#f9ddcc] text-[#a0440c]' : task.priority === 'Medium' ? 'bg-[#f5ebbd] text-[#77600b]' : 'bg-[#dcebe5] text-[#286052]'}`}>{task.priority}</span>{status === 'done' ? <span className="text-[#4d5752]">Completed {task.completed}<span className="mt-1 block text-[13px] text-[#7a817c]">{task.completedTime ?? 'Time not recorded'}</span></span> : <span className={task.overdue ? 'font-semibold text-[#a0440c]' : 'text-[#4d5752]'}>{task.overdue && 'Overdue · '}{!task.overdue && 'Due '}{task.due}</span>}</div><div className="mt-5 flex items-center justify-between text-[14px] text-[#4d5752]"><span>{task.tag}</span><span className={`grid h-[34px] w-[34px] place-items-center rounded-full text-[12px] font-bold text-white ${task.initials === 'RM' ? 'bg-[#a13f08]' : 'bg-[#216656]'}`}>{task.initials}</span></div></article>)}</div></section>
           })}
         </div>
       </section>
