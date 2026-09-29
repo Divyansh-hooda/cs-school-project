@@ -20,7 +20,7 @@ type Task = {
   completed?: string
 }
 
-const projects = ['Website Relaunch', 'Mobile App v2', 'Q4 Marketing']
+const initialProjects = ['Website Relaunch', 'Mobile App v2', 'Q4 Marketing']
 const people = ['AK', 'RM', 'SP']
 
 const initialTasks: Task[] = [
@@ -37,8 +37,11 @@ const initialTasks: Task[] = [
 const statusLabels: Record<Status, string> = { todo: 'To Do', progress: 'In Progress', done: 'Done' }
 
 export default function Page() {
-  const [activeProject, setActiveProject] = useState(projects[0])
+  const [projects, setProjects] = useState(initialProjects)
+  const [activeProject, setActiveProject] = useState(initialProjects[0])
   const [tasks, setTasks] = useState(initialTasks)
+  const [projectDialogOpen, setProjectDialogOpen] = useState(false)
+  const [newProjectName, setNewProjectName] = useState('')
   const [query, setQuery] = useState('')
   const [priority, setPriority] = useState('All')
   const [assignee, setAssignee] = useState('Anyone')
@@ -63,6 +66,16 @@ export default function Page() {
     setDragged(null)
   }
 
+  const addProject = (event: React.FormEvent) => {
+    event.preventDefault()
+    const name = newProjectName.trim()
+    if (!name || projects.includes(name)) return
+    setProjects((current) => [...current, name])
+    setActiveProject(name)
+    setNewProjectName('')
+    setProjectDialogOpen(false)
+  }
+
   const addTask = (event: React.FormEvent) => {
     event.preventDefault()
     if (!newTitle.trim()) return
@@ -84,7 +97,7 @@ export default function Page() {
         <nav className="mt-3 space-y-2" aria-label="Projects">
           {projects.map((project) => <button key={project} onClick={() => setActiveProject(project)} className={`block w-full rounded-[10px] px-4 py-3 text-left text-[16px] transition ${activeProject === project ? 'bg-[#f5f2eb] font-semibold text-[#252a27]' : 'text-[#f0efeb] hover:bg-white/10'}`}>{project}</button>)}
         </nav>
-        <button className="mt-8 rounded-[10px] border border-[#718077] px-4 py-3 text-[16px] text-[#f6f4ef] hover:bg-white/10 lg:mt-auto">+ New project</button>
+        <button type="button" onClick={() => setProjectDialogOpen(true)} className="mt-8 rounded-[10px] border border-[#718077] px-4 py-3 text-[16px] text-[#f6f4ef] hover:bg-white/10 lg:mt-auto">+ New project</button>
       </aside>
 
       <section className="w-full max-w-[1380px] px-6 py-10 sm:px-10 lg:px-10 xl:px-10">
@@ -107,6 +120,8 @@ export default function Page() {
           })}
         </div>
       </section>
+
+      {projectDialogOpen && <div className="fixed inset-0 z-20 grid place-items-center bg-[#1f2522]/45 p-4" role="presentation" onMouseDown={(event) => event.target === event.currentTarget && setProjectDialogOpen(false)}><form onSubmit={addProject} className="w-full max-w-[440px] rounded-2xl bg-[#fbfaf6] p-7 shadow-2xl"><div className="flex items-center justify-between"><h2 className="font-serif text-3xl font-bold">New project</h2><button type="button" aria-label="Close project dialog" onClick={() => setProjectDialogOpen(false)} className="rounded-full p-2 hover:bg-[#ebe6da]"><X size={20} /></button></div><label className="mt-6 block text-sm font-semibold">Project name<input autoFocus required value={newProjectName} onChange={(event) => setNewProjectName(event.target.value)} className="mt-2 h-12 w-full rounded-lg border border-[#d5cdbd] bg-white px-3 outline-none focus:border-[#216656]" placeholder="e.g. Product launch" /></label><button className="mt-6 w-full rounded-lg bg-[#216656] py-3 font-bold text-white hover:bg-[#194e42]">Create project</button></form></div>}
 
       {dialogOpen && <div className="fixed inset-0 z-10 grid place-items-center bg-[#1f2522]/45 p-4" role="presentation" onMouseDown={(event) => event.target === event.currentTarget && setDialogOpen(false)}><form onSubmit={addTask} className="w-full max-w-[440px] rounded-2xl bg-[#fbfaf6] p-7 shadow-2xl"><div className="flex items-center justify-between"><h2 className="font-serif text-3xl font-bold">Add task</h2><button type="button" aria-label="Close dialog" onClick={() => setDialogOpen(false)} className="rounded-full p-2 hover:bg-[#ebe6da]"><X size={20} /></button></div><label className="mt-6 block text-sm font-semibold">Task name<input autoFocus required value={newTitle} onChange={(event) => setNewTitle(event.target.value)} className="mt-2 h-12 w-full rounded-lg border border-[#d5cdbd] bg-white px-3 outline-none focus:border-[#216656]" placeholder="What needs to be done?" /></label><div className="mt-4 grid grid-cols-2 gap-3"><label className="text-sm font-semibold">Priority<select value={newPriority} onChange={(event) => setNewPriority(event.target.value as Priority)} className="mt-2 h-11 w-full rounded-lg border border-[#d5cdbd] bg-white px-3 font-normal"><option>High</option><option>Medium</option><option>Low</option></select></label><label className="text-sm font-semibold">Assignee<select value={newAssignee} onChange={(event) => setNewAssignee(event.target.value)} className="mt-2 h-11 w-full rounded-lg border border-[#d5cdbd] bg-white px-3 font-normal"><option>Alex Kim</option><option>Riley Morgan</option><option>Sam Patel</option></select></label></div><button className="mt-6 w-full rounded-lg bg-[#216656] py-3 font-bold text-white hover:bg-[#194e42]">Create task</button></form></div>}
     </main>
