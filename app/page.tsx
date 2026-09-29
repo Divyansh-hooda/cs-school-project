@@ -14,8 +14,6 @@ type Task = {
   priority: Priority
   due: string
   overdue?: boolean
-  assignee: string
-  initials: string
   tag: string
   completed?: string
   completedTime?: string
@@ -25,14 +23,14 @@ const initialProjects = ['Website Relaunch', 'Mobile App v2', 'Q4 Marketing']
 const people = ['AK', 'RM', 'SP']
 
 const initialTasks: Task[] = [
-  { id: 1, title: 'Write homepage copy', project: 'Website Relaunch', status: 'todo', priority: 'High', due: 'Sep 26', overdue: true, assignee: 'Alex Kim', initials: 'AK', tag: 'Content' },
-  { id: 2, title: 'Audit existing site pages', project: 'Website Relaunch', status: 'todo', priority: 'Medium', due: 'Oct 5', assignee: 'Riley Morgan', initials: 'RM', tag: 'Research' },
-  { id: 3, title: 'Set up analytics tracking', project: 'Website Relaunch', status: 'todo', priority: 'Low', due: 'Oct 14', assignee: 'Sam Patel', initials: 'SP', tag: 'Development' },
-  { id: 4, title: 'Design new navigation', project: 'Website Relaunch', status: 'progress', priority: 'High', due: 'Sep 28', overdue: true, assignee: 'Riley Morgan', initials: 'RM', tag: 'Design' },
-  { id: 5, title: 'Migrate blog posts', project: 'Website Relaunch', status: 'progress', priority: 'Medium', due: 'Oct 8', assignee: 'Sam Patel', initials: 'SP', tag: 'Development' },
-  { id: 6, title: 'Define site goals', project: 'Website Relaunch', status: 'done', priority: 'Low', due: 'Sep 20', assignee: 'Alex Kim', initials: 'AK', tag: 'Strategy', completed: 'Sep 20', completedTime: '4:15 PM' },
-  { id: 7, title: 'Choose hosting provider', project: 'Website Relaunch', status: 'done', priority: 'Medium', due: 'Sep 22', assignee: 'Sam Patel', initials: 'SP', tag: 'Infrastructure', completed: 'Sep 22', completedTime: '11:40 AM' },
-  { id: 8, title: 'Create sitemap', project: 'Website Relaunch', status: 'done', priority: 'Low', due: 'Sep 24', assignee: 'Riley Morgan', initials: 'RM', tag: 'Research', completed: 'Sep 24', completedTime: '2:05 PM' },
+  { id: 1, title: 'Write homepage copy', project: 'Website Relaunch', status: 'todo', priority: 'High', due: 'Sep 26', overdue: true, tag: 'Content' },
+  { id: 2, title: 'Audit existing site pages', project: 'Website Relaunch', status: 'todo', priority: 'Medium', due: 'Oct 5', tag: 'Research' },
+  { id: 3, title: 'Set up analytics tracking', project: 'Website Relaunch', status: 'todo', priority: 'Low', due: 'Oct 14', tag: 'Development' },
+  { id: 4, title: 'Design new navigation', project: 'Website Relaunch', status: 'progress', priority: 'High', due: 'Sep 28', overdue: true, tag: 'Design' },
+  { id: 5, title: 'Migrate blog posts', project: 'Website Relaunch', status: 'progress', priority: 'Medium', due: 'Oct 8', tag: 'Development' },
+  { id: 6, title: 'Define site goals', project: 'Website Relaunch', status: 'done', priority: 'Low', due: 'Sep 20', tag: 'Strategy', completed: 'Sep 20', completedTime: '4:15 PM' },
+  { id: 7, title: 'Choose hosting provider', project: 'Website Relaunch', status: 'done', priority: 'Medium', due: 'Sep 22', tag: 'Infrastructure', completed: 'Sep 22', completedTime: '11:40 AM' },
+  { id: 8, title: 'Create sitemap', project: 'Website Relaunch', status: 'done', priority: 'Low', due: 'Sep 24', tag: 'Research', completed: 'Sep 24', completedTime: '2:05 PM' },
 ]
 
 const statusLabels: Record<Status, string> = { todo: 'To Do', progress: 'In Progress', done: 'Done' }
@@ -45,28 +43,20 @@ export default function Page() {
   const [newProjectName, setNewProjectName] = useState('')
   const [query, setQuery] = useState('')
   const [priority, setPriority] = useState('All')
-  const [assignee, setAssignee] = useState('Anyone')
   const [overdueOnly, setOverdueOnly] = useState(false)
   const [dragged, setDragged] = useState<number | null>(null)
   const [dialogOpen, setDialogOpen] = useState(false)
   const [newTitle, setNewTitle] = useState('')
   const [newPriority, setNewPriority] = useState<Priority>('Medium')
-  const [newAssignee, setNewAssignee] = useState('Alex Kim')
   const [newDue, setNewDue] = useState('')
-  const [newAssigneeName, setNewAssigneeName] = useState('')
-  const [newAssigneePhone, setNewAssigneePhone] = useState('')
-  const [assignees, setAssignees] = useState(['Alex Kim', 'Riley Morgan', 'Sam Patel'])
   const [showDue, setShowDue] = useState(false)
-  const [showNewAssignee, setShowNewAssignee] = useState(false)
-  const [dialogMode, setDialogMode] = useState<'task' | 'assignee'>('task')
 
   const visibleTasks = useMemo(() => tasks.filter((task) => {
     return task.project === activeProject &&
       (!query || task.title.toLowerCase().includes(query.toLowerCase())) &&
       (priority === 'All' || task.priority === priority) &&
-      (assignee === 'Anyone' || task.assignee === assignee) &&
       (!overdueOnly || task.overdue)
-  }), [tasks, activeProject, query, priority, assignee, overdueOnly])
+  }), [tasks, activeProject, query, priority, overdueOnly])
 
   const moveTask = (status: Status) => {
     if (dragged === null) return
@@ -88,32 +78,13 @@ export default function Page() {
     setProjectDialogOpen(false)
   }
 
-  const addNewAssignee = () => {
-    const name = newAssigneeName.trim()
-    if (!name || assignees.includes(name)) return
-    setAssignees((current) => [...current, name])
-    setNewAssignee(name)
-    setNewAssigneeName('')
-    setShowNewAssignee(false)
-  }
-
-  const submitAssignee = (event: React.FormEvent) => {
-    event.preventDefault()
-    addNewAssignee()
-    setNewAssigneePhone('')
-  }
-
   const addTask = (event: React.FormEvent) => {
     event.preventDefault()
     if (!newTitle.trim()) return
-    const selectedAssignee = newAssigneeName.trim() || newAssignee
-    const person = selectedAssignee.split(' ')[0]
-    setTasks((current) => [...current, { id: Date.now(), title: newTitle.trim(), project: activeProject, status: 'todo', priority: newPriority, due: newDue || 'Oct 21', assignee: selectedAssignee, initials: person[0] + (selectedAssignee.split(' ')[1]?.[0] ?? ''), tag: 'General' }])
+    setTasks((current) => [...current, { id: Date.now(), title: newTitle.trim(), project: activeProject, status: 'todo', priority: newPriority, due: newDue || 'Oct 21', tag: 'General' }])
     setNewTitle('')
     setNewDue('')
-    setNewAssigneeName('')
     setShowDue(false)
-    setShowNewAssignee(false)
     setDialogOpen(false)
   }
 
@@ -141,21 +112,20 @@ export default function Page() {
         <div className="mt-8 flex flex-wrap gap-3">
           <label className="relative block w-full sm:w-[317px]"><Search size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-[#65706a]" /><input aria-label="Search tasks" value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Search tasks" className="h-[55px] w-full rounded-[10px] border border-[#d5cdbd] bg-white px-11 text-[16px] outline-none focus:border-[#216656]" /></label>
           <select aria-label="Priority" value={priority} onChange={(event) => setPriority(event.target.value)} className="priority-select h-[55px] rounded-[10px] border border-[#d5cdbd] bg-white px-5 pr-12 text-[16px] outline-none"><option>All</option><option>High</option><option>Medium</option><option>Low</option></select>
-          <select aria-label="Assignee" value={assignee} onChange={(event) => setAssignee(event.target.value)} className="assignee-select h-[55px] rounded-[10px] border border-[#d5cdbd] bg-white px-5 pr-12 text-[16px] outline-none"><option>Anyone</option>{['Alex Kim', 'Riley Morgan', 'Sam Patel'].map((person) => <option key={person}>{person}</option>)}</select>
           <button onClick={() => setOverdueOnly(!overdueOnly)} className={`h-[55px] rounded-[10px] border px-5 text-[16px] font-medium ${overdueOnly ? 'border-[#a6440b] bg-[#f9ddcc] text-[#963d0c]' : 'border-[#d5cdbd] bg-[#f9ddcc] text-[#963d0c]'}`}>Overdue only</button>
         </div>
 
         <div className="mt-7 grid items-stretch gap-6 xl:grid-cols-3">
           {(['todo', 'progress', 'done'] as Status[]).map((status) => {
             const columnTasks = visibleTasks.filter((task) => task.status === status)
-            return <section key={status} onDragOver={(event) => event.preventDefault()} onDrop={() => moveTask(status)} className="min-h-[530px] rounded-[17px] bg-[#ebe6da] p-5"><div className="mb-4 flex items-center justify-between"><h2 className="text-[16px] font-bold">{statusLabels[status]}</h2><span className="text-[16px] font-semibold text-[#4d5752]">{columnTasks.length}</span></div><div className="space-y-4">{columnTasks.map((task) => <article key={task.id} draggable onDragStart={() => setDragged(task.id)} className={`relative rounded-[15px] border border-[#ddd5c5] bg-white p-5 shadow-[0_1px_2px_rgba(30,30,20,.03)] ${status === 'done' ? 'bg-[#faf8f3]' : ''}`}>{status === 'done' && <button type="button" aria-label={`Delete ${task.title}`} onClick={() => deleteTask(task.id)} className="absolute right-4 top-4 rounded-md p-1 text-[#7a817c] hover:bg-[#f1ddd3] hover:text-[#a0440c]"><X size={16} /></button>}<h3 className={`text-[18px] font-bold leading-tight ${status === 'done' ? 'text-[#5b625e] line-through pr-6' : ''}`}>{task.title}</h3><div className="mt-4 flex items-center gap-2 text-[14px]"><span className={`rounded-full px-3 py-1 font-semibold ${task.priority === 'High' ? 'bg-[#f9ddcc] text-[#a0440c]' : task.priority === 'Medium' ? 'bg-[#f5ebbd] text-[#77600b]' : 'bg-[#dcebe5] text-[#286052]'}`}>{task.priority}</span>{status === 'done' ? <span className="text-[#4d5752]">Completed {task.completed}<span className="mt-1 block text-[13px] text-[#7a817c]">{task.completedTime ?? 'Time not recorded'}</span></span> : <span className={task.overdue ? 'font-semibold text-[#a0440c]' : 'text-[#4d5752]'}>{task.overdue && 'Overdue · '}{!task.overdue && 'Due '}{task.due}</span>}</div><div className="mt-5 flex items-center justify-between text-[14px] text-[#4d5752]"><span>{task.tag}</span><span className={`grid h-[34px] w-[34px] place-items-center rounded-full text-[12px] font-bold text-white ${task.initials === 'RM' ? 'bg-[#a13f08]' : 'bg-[#216656]'}`}>{task.initials}</span></div></article>)}</div></section>
+            return <section key={status} onDragOver={(event) => event.preventDefault()} onDrop={() => moveTask(status)} className="min-h-[530px] rounded-[17px] bg-[#ebe6da] p-5"><div className="mb-4 flex items-center justify-between"><h2 className="text-[16px] font-bold">{statusLabels[status]}</h2><span className="text-[16px] font-semibold text-[#4d5752]">{columnTasks.length}</span></div><div className="space-y-4">{columnTasks.map((task) => <article key={task.id} draggable onDragStart={() => setDragged(task.id)} className={`relative rounded-[15px] border border-[#ddd5c5] bg-white p-5 shadow-[0_1px_2px_rgba(30,30,20,.03)] ${status === 'done' ? 'bg-[#faf8f3]' : ''}`}>{status === 'done' && <button type="button" aria-label={`Delete ${task.title}`} onClick={() => deleteTask(task.id)} className="absolute right-4 top-4 rounded-md p-1 text-[#7a817c] hover:bg-[#f1ddd3] hover:text-[#a0440c]"><X size={16} /></button>}<h3 className={`text-[18px] font-bold leading-tight ${status === 'done' ? 'text-[#5b625e] line-through pr-6' : ''}`}>{task.title}</h3><div className="mt-4 flex items-center gap-2 text-[14px]"><span className={`rounded-full px-3 py-1 font-semibold ${task.priority === 'High' ? 'bg-[#f9ddcc] text-[#a0440c]' : task.priority === 'Medium' ? 'bg-[#f5ebbd] text-[#77600b]' : 'bg-[#dcebe5] text-[#286052]'}`}>{task.priority}</span>{status === 'done' ? <span className="text-[#4d5752]">Completed {task.completed}<span className="mt-1 block text-[13px] text-[#7a817c]">{task.completedTime ?? 'Time not recorded'}</span></span> : <span className={task.overdue ? 'font-semibold text-[#a0440c]' : 'text-[#4d5752]'}>{task.overdue && 'Overdue · '}{!task.overdue && 'Due '}{task.due}</span>}</div><div className="mt-5 text-[14px] text-[#4d5752]"><span>{task.tag}</span></div></article>)}</div></section>
           })}
         </div>
       </section>
 
       {projectDialogOpen && <div className="fixed inset-0 z-20 grid place-items-center bg-[#1f2522]/45 p-4" role="presentation" onMouseDown={(event) => event.target === event.currentTarget && setProjectDialogOpen(false)}><form onSubmit={addProject} className="w-full max-w-[440px] rounded-2xl bg-[#fbfaf6] p-7 shadow-2xl"><div className="flex items-center justify-between"><h2 className="font-serif text-3xl font-bold">New project</h2><button type="button" aria-label="Close project dialog" onClick={() => setProjectDialogOpen(false)} className="rounded-full p-2 hover:bg-[#ebe6da]"><X size={20} /></button></div><label className="mt-6 block text-sm font-semibold">Project name<input autoFocus required value={newProjectName} onChange={(event) => setNewProjectName(event.target.value)} className="mt-2 h-12 w-full rounded-lg border border-[#d5cdbd] bg-white px-3 outline-none focus:border-[#216656]" placeholder="e.g. Product launch" /></label><button className="mt-6 w-full rounded-lg bg-[#216656] py-3 font-bold text-white hover:bg-[#194e42]">Create project</button></form></div>}
 
-      {dialogOpen && <div className="fixed inset-0 z-10 grid place-items-center bg-[#1f2522]/45 p-4" role="presentation" onMouseDown={(event) => event.target === event.currentTarget && setDialogOpen(false)}><form onSubmit={dialogMode === 'task' ? addTask : submitAssignee} className="w-full max-w-[440px] rounded-2xl bg-[#fbfaf6] p-7 shadow-2xl"><div className="flex items-center justify-between"><h2 className="font-serif text-3xl font-bold">{dialogMode === 'task' ? 'Add task' : 'Add new assignee'}</h2><button type="button" aria-label="Close dialog" onClick={() => setDialogOpen(false)} className="rounded-full p-2 hover:bg-[#ebe6da]"><X size={20} /></button></div><div className="mt-6 grid grid-cols-2 gap-2 rounded-lg bg-[#ebe6da] p-1"><button type="button" onClick={() => setDialogMode('task')} className={`rounded-md px-3 py-2 text-sm font-semibold ${dialogMode === 'task' ? 'bg-[#fbfaf6] text-[#216656] shadow-sm' : 'text-[#4d5752]'}`}>Add task</button><button type="button" onClick={() => setDialogMode('assignee')} className={`rounded-md px-3 py-2 text-sm font-semibold ${dialogMode === 'assignee' ? 'bg-[#fbfaf6] text-[#216656] shadow-sm' : 'text-[#4d5752]'}`}>Add new assignee</button></div>{dialogMode === 'assignee' ? <div className="mt-6 space-y-4"><label className="block text-sm font-semibold">Assignee name<input autoFocus required value={newAssigneeName} onChange={(event) => setNewAssigneeName(event.target.value)} className="mt-2 h-12 w-full rounded-lg border border-[#d5cdbd] bg-white px-3 outline-none focus:border-[#216656]" placeholder="Full name" /></label><label className="block text-sm font-semibold">Phone number<input required type="tel" value={newAssigneePhone} onChange={(event) => setNewAssigneePhone(event.target.value)} className="mt-2 h-12 w-full rounded-lg border border-[#d5cdbd] bg-white px-3 outline-none focus:border-[#216656]" placeholder="e.g. +1 555 123 4567" /></label></div> : <label className="mt-6 block text-sm font-semibold">Task name<input autoFocus required value={newTitle} onChange={(event) => setNewTitle(event.target.value)} className="mt-2 h-12 w-full rounded-lg border border-[#d5cdbd] bg-white px-3 outline-none focus:border-[#216656]" placeholder="What needs to be done?" /></label>}<div className={dialogMode === 'task' ? 'mt-4 grid grid-cols-2 gap-3' : 'hidden'}><label className="text-sm font-semibold">Priority<select value={newPriority} onChange={(event) => setNewPriority(event.target.value as Priority)} className="dialog-priority-select mt-2 h-11 w-full rounded-lg border border-[#d5cdbd] bg-white px-3 pr-10 font-normal"><option>High</option><option>Medium</option><option>Low</option></select></label><label className="text-sm font-semibold">Assignee<select value={newAssignee} onChange={(event) => setNewAssignee(event.target.value)} className="dialog-assignee-select mt-2 h-11 w-full rounded-lg border border-[#d5cdbd] bg-white px-3 pr-10 font-normal">{assignees.map((assignee) => <option key={assignee}>{assignee}</option>)}</select></label></div><div className="mt-4 flex flex-wrap gap-2"></div>{showDue && <div className="mt-3 grid grid-cols-2 gap-3"><label className="text-sm font-semibold">Date<input type="date" value={newDue.split('T')[0] ?? ''} onChange={(event) => setNewDue(`${event.target.value}T${newDue.split('T')[1] || '09:00'}`)} className="mt-2 h-11 w-full rounded-lg border border-[#d5cdbd] bg-white px-3 font-normal outline-none focus:border-[#216656]" /></label><label className="text-sm font-semibold">Time<input type="time" value={newDue.split('T')[1] ?? ''} onChange={(event) => setNewDue(`${newDue.split('T')[0] || new Date().toISOString().split('T')[0]}T${event.target.value}`)} className="mt-2 h-11 w-full rounded-lg border border-[#d5cdbd] bg-white px-3 font-normal outline-none focus:border-[#216656]" /></label></div>}{showNewAssignee && <label className="mt-3 block text-sm font-semibold">New assignee<div className="mt-2 flex h-11 overflow-hidden rounded-lg border border-[#d5cdbd] bg-white focus-within:border-[#216656]"><input value={newAssigneeName} onChange={(event) => setNewAssigneeName(event.target.value)} className="min-w-0 flex-1 bg-transparent px-3 font-normal outline-none" placeholder="Full name" /><button type="button" onClick={addNewAssignee} className="border-l border-[#d5cdbd] bg-[#e1eee9] px-3 text-sm font-bold text-[#216656] hover:bg-[#cfe3db]">Add</button></div></label>}<button className="mt-6 w-full rounded-lg bg-[#216656] py-3 font-bold text-white hover:bg-[#194e42]">{dialogMode === 'task' ? 'Create task' : 'Add assignee'}</button></form></div>}
+      {dialogOpen && <div className="fixed inset-0 z-10 grid place-items-center bg-[#1f2522]/45 p-4" role="presentation" onMouseDown={(event) => event.target === event.currentTarget && setDialogOpen(false)}><form onSubmit={addTask} className="w-full max-w-[440px] rounded-2xl bg-[#fbfaf6] p-7 shadow-2xl"><div className="flex items-center justify-between"><h2 className="font-serif text-3xl font-bold">Add task</h2><button type="button" aria-label="Close dialog" onClick={() => setDialogOpen(false)} className="rounded-full p-2 hover:bg-[#ebe6da]"><X size={20} /></button></div><label className="mt-6 block text-sm font-semibold">Task name<input autoFocus required value={newTitle} onChange={(event) => setNewTitle(event.target.value)} className="mt-2 h-12 w-full rounded-lg border border-[#d5cdbd] bg-white px-3 outline-none focus:border-[#216656]" placeholder="What needs to be done?" /></label><div className="mt-4 grid grid-cols-2 gap-3"><label className="text-sm font-semibold">Priority<select value={newPriority} onChange={(event) => setNewPriority(event.target.value as Priority)} className="dialog-priority-select mt-2 h-11 w-full rounded-lg border border-[#d5cdbd] bg-white px-3 pr-10 font-normal"><option>High</option><option>Medium</option><option>Low</option></select></label></div>{showDue && <div className="mt-3 grid grid-cols-2 gap-3"><label className="text-sm font-semibold">Date<input type="date" value={newDue.split('T')[0] ?? ''} onChange={(event) => setNewDue(`${event.target.value}T${newDue.split('T')[1] || '09:00'}`)} className="mt-2 h-11 w-full rounded-lg border border-[#d5cdbd] bg-white px-3 font-normal outline-none focus:border-[#216656]" /></label><label className="text-sm font-semibold">Time<input type="time" value={newDue.split('T')[1] ?? ''} onChange={(event) => setNewDue(`${newDue.split('T')[0] || new Date().toISOString().split('T')[0]}T${event.target.value}`)} className="mt-2 h-11 w-full rounded-lg border border-[#d5cdbd] bg-white px-3 font-normal outline-none focus:border-[#216656]" /></label></div>}<button className="mt-6 w-full rounded-lg bg-[#216656] py-3 font-bold text-white hover:bg-[#194e42]">{true ? 'Create task' : 'Add assignee'}</button></form></div>}
     </main>
   )
 }
