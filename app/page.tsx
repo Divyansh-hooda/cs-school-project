@@ -42,7 +42,7 @@ export default function Page() {
   const [projectDialogOpen, setProjectDialogOpen] = useState(false)
   const [newProjectName, setNewProjectName] = useState('')
   const [query, setQuery] = useState('')
-  const [priority, setPriority] = useState('All')
+  const [priority, setPriority] = useState('Priority')
   const [overdueOnly, setOverdueOnly] = useState(false)
   const [dragged, setDragged] = useState<number | null>(null)
   const [dialogOpen, setDialogOpen] = useState(false)
@@ -54,7 +54,7 @@ export default function Page() {
   const visibleTasks = useMemo(() => tasks.filter((task) => {
     return task.project === activeProject &&
       (!query || task.title.toLowerCase().includes(query.toLowerCase())) &&
-      (priority === 'All' || task.priority === priority) &&
+      (priority === 'Priority' || task.priority === priority) &&
       (!overdueOnly || task.overdue)
   }), [tasks, activeProject, query, priority, overdueOnly])
 
@@ -111,7 +111,7 @@ export default function Page() {
 
         <div className="mt-8 flex flex-wrap gap-3">
           <label className="relative block w-full sm:w-[317px]"><Search size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-[#65706a]" /><input aria-label="Search tasks" value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Search tasks" className="h-[55px] w-full rounded-[10px] border border-[#d5cdbd] bg-white px-11 text-[16px] outline-none focus:border-[#216656]" /></label>
-          <select aria-label="Priority" value={priority} onChange={(event) => setPriority(event.target.value)} className="priority-select h-[55px] rounded-[10px] border border-[#d5cdbd] bg-white px-5 pr-12 text-[16px] outline-none"><option>All</option><option>High</option><option>Medium</option><option>Low</option></select>
+          <select aria-label="Priority" value={priority} onChange={(event) => setPriority(event.target.value)} className="priority-select h-[55px] rounded-[10px] border border-[#d5cdbd] bg-white px-5 pr-12 text-[16px] outline-none"><option>Priority</option><option>High</option><option>Medium</option><option>Low</option></select>
           <button onClick={() => setOverdueOnly(!overdueOnly)} className={`h-[55px] rounded-[10px] border px-5 text-[16px] font-medium ${overdueOnly ? 'border-[#a6440b] bg-[#f9ddcc] text-[#963d0c]' : 'border-[#d5cdbd] bg-[#f9ddcc] text-[#963d0c]'}`}>Overdue only</button>
         </div>
 
