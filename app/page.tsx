@@ -118,12 +118,12 @@ export default function Page() {
   return (
     <main className="flex min-h-screen justify-center bg-[#f5f2eb] text-[#252a27]">
       <section className="mx-auto flex w-full max-w-[1380px] flex-col items-center px-6 py-10 text-center sm:px-10 lg:px-10 xl:px-10">
-        <header className="flex w-full flex-col items-center justify-center gap-7 text-center xl:flex-row xl:items-center">
+        <header className="flex w-full flex-col items-start justify-between gap-7 text-left sm:flex-row sm:items-center">
           <div><h1 className="font-serif text-[42px] font-bold leading-none tracking-[-1.5px] sm:text-[48px]">TASKLANE</h1><p className="mt-3 text-[17px] text-[#4d5752]">{projectTasks.length} tasks · {overdueCount} overdue · {doneCount} done</p></div>
           <button onClick={() => setDialogOpen(true)} className="inline-flex w-fit items-center gap-2 rounded-[9px] bg-[#216656] px-6 py-4 text-[16px] font-bold text-white hover:bg-[#194e42]"><Plus size={17} strokeWidth={3} /> Add task</button>
         </header>
 
-        <div className="mt-8 flex w-full flex-wrap justify-center gap-3">
+        <div className="mt-8 flex w-full flex-wrap justify-start gap-3">
           <label className="relative block w-full sm:w-[317px]"><Search size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-[#65706a]" /><input aria-label="Search tasks" value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Search tasks" className="h-[55px] w-full rounded-[10px] border border-[#d5cdbd] bg-white px-11 text-[16px] outline-none focus:border-[#216656]" /></label>
           <select aria-label="Priority" value={priority} onChange={(event) => setPriority(event.target.value)} className="priority-select h-[55px] rounded-[10px] border border-[#d5cdbd] bg-white px-5 pr-12 text-[16px] outline-none"><option>Priority</option><option>High</option><option>Medium</option><option>Low</option></select>
           <button onClick={() => setOverdueOnly(!overdueOnly)} className={`h-[55px] rounded-[10px] border px-5 text-[16px] font-medium ${overdueOnly ? 'border-[#a6440b] bg-[#f9ddcc] text-[#963d0c]' : 'border-[#d5cdbd] bg-[#f9ddcc] text-[#963d0c]'}`}>Overdue tasks</button>
