@@ -163,6 +163,10 @@
   background-repeat: no-repeat;
 }
 
+.category-select {
+  background-image: none;
+}
+
 .task-dialog.dialog-category > label:not(.category-form),
 .task-dialog.dialog-category > div:not(.dialog-tabs),
 .task-dialog.dialog-category > button:not(.category-form),
