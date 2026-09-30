@@ -170,7 +170,12 @@
 .task-dialog.dialog-category > label:not(.category-form),
 .task-dialog.dialog-category > div:not(.dialog-tabs),
 .task-dialog.dialog-category > button:not(.category-form),
-.task-dialog.dialog-task > .category-form {
+.task-dialog.dialog-task > .category-form,
+.task-dialog.dialog-task > .remove-category-form,
+.task-dialog.dialog-category > .remove-category-form,
+.task-dialog.dialog-remove-category > label:not(.remove-category-form),
+.task-dialog.dialog-remove-category > div:not(.dialog-tabs),
+.task-dialog.dialog-remove-category > button:not(.remove-category-form) {
   display: none;
 }
 
