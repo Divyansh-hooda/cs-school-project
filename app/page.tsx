@@ -117,7 +117,7 @@ export default function Page() {
 
   return (
     <main className="flex min-h-screen justify-center bg-[#f5f2eb] text-[#252a27]">
-      <section className="mx-auto flex w-full max-w-[1380px] flex-col items-center px-6 py-10 text-center sm:px-10 lg:px-10 xl:px-10">
+      <section className="mx-auto flex w-full max-w-[1380px] flex-col items-stretch px-6 py-10 text-left sm:px-10 lg:px-10 xl:px-10">
         <header className="flex w-full flex-col items-start justify-between gap-7 text-left sm:flex-row sm:items-center">
           <div><h1 className="font-serif text-[42px] font-bold leading-none tracking-[-1.5px] sm:text-[48px]">TASKLANE</h1><p className="mt-3 text-[17px] text-[#4d5752]">{projectTasks.length} tasks · {overdueCount} overdue · {doneCount} done</p></div>
           <button onClick={() => setDialogOpen(true)} className="inline-flex w-fit items-center gap-2 rounded-[9px] bg-[#216656] px-6 py-4 text-[16px] font-bold text-white hover:bg-[#194e42]"><Plus size={17} strokeWidth={3} /> Add task</button>
