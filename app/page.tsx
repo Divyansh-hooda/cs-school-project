@@ -117,15 +117,6 @@ export default function Page() {
 
   return (
     <main className="min-h-screen bg-[#f5f2eb] text-[#252a27] lg:flex">
-      <aside className="flex w-full flex-col bg-[#1f2522] px-6 py-9 text-[#f6f4ef] lg:min-h-screen lg:w-[283px] lg:shrink-0">
-        <div className="font-serif text-[32px] font-bold tracking-[-1.5px]">Tasklane</div>
-        <div className="mt-9 text-[14px] uppercase tracking-[1.2px] text-[#b9c1bb]">Projects</div>
-        <nav className="mt-3 space-y-2" aria-label="Projects">
-          {projects.map((project) => <button key={project} onClick={() => setActiveProject(project)} className={`block w-full rounded-[10px] px-4 py-3 text-left text-[16px] transition ${activeProject === project ? 'bg-[#f5f2eb] font-semibold text-[#252a27]' : 'text-[#f0efeb] hover:bg-white/10'}`}>{project}</button>)}
-        </nav>
-        <button type="button" onClick={() => setProjectDialogOpen(true)} className="mt-8 rounded-[10px] border border-[#718077] px-4 py-3 text-[16px] text-[#f6f4ef] hover:bg-white/10 lg:mt-auto">+ New project</button>
-      </aside>
-
       <section className="w-full max-w-[1380px] px-6 py-10 sm:px-10 lg:px-10 xl:px-10">
         <header className="flex flex-col gap-7 xl:flex-row xl:items-start xl:justify-between">
           <div><h1 className="font-serif text-[42px] font-bold leading-none tracking-[-1.5px] sm:text-[48px]">{activeProject}</h1><p className="mt-3 text-[17px] text-[#4d5752]">{projectTasks.length} tasks · {overdueCount} overdue · {doneCount} done</p></div>
