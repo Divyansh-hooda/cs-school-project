@@ -162,6 +162,12 @@
   background-repeat: no-repeat;
 }
 
+.task-dialog.dialog-category > label:not(.category-form),
+.task-dialog.dialog-category > div:not(.dialog-tabs),
+.task-dialog.dialog-category > button:not(.category-form) {
+  display: none;
+}
+
 @layer base {
   * {
     @apply border-border outline-ring/50;
