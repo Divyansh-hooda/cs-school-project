@@ -1,6 +1,7 @@
 'use client'
 
-import { useMemo, useState } from 'react'
+import useSWR from 'swr'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { Plus, Search, X } from 'lucide-react'
 
 type Status = 'todo' | 'progress' | 'done'
@@ -22,20 +23,14 @@ type Task = {
 const initialProjects = ['Website Relaunch', 'Mobile App v2', 'Q4 Marketing']
 const people = ['AK', 'RM', 'SP']
 
-const initialTasks: Task[] = [
-  { id: 1, title: 'Write homepage copy', project: 'Website Relaunch', status: 'todo', priority: 'High', due: 'Sep 26', overdue: true, tag: 'Content' },
-  { id: 2, title: 'Audit existing site pages', project: 'Website Relaunch', status: 'todo', priority: 'Medium', due: 'Oct 5', tag: 'Research' },
-  { id: 3, title: 'Set up analytics tracking', project: 'Website Relaunch', status: 'todo', priority: 'Low', due: 'Oct 14', tag: 'Development' },
-  { id: 4, title: 'Design new navigation', project: 'Website Relaunch', status: 'progress', priority: 'High', due: 'Sep 28', overdue: true, tag: 'Design' },
-  { id: 5, title: 'Migrate blog posts', project: 'Website Relaunch', status: 'progress', priority: 'Medium', due: 'Oct 8', tag: 'Development' },
-  { id: 6, title: 'Define site goals', project: 'Website Relaunch', status: 'done', priority: 'Low', due: 'Sep 20', tag: 'Strategy', completed: 'Sep 20', completedTime: '4:15 PM' },
-  { id: 7, title: 'Choose hosting provider', project: 'Website Relaunch', status: 'done', priority: 'Medium', due: 'Sep 22', tag: 'Infrastructure', completed: 'Sep 22', completedTime: '11:40 AM' },
-  { id: 8, title: 'Create sitemap', project: 'Website Relaunch', status: 'done', priority: 'Low', due: 'Sep 24', tag: 'Research', completed: 'Sep 24', completedTime: '2:05 PM' },
-]
+const initialTasks: Task[] = []
 
 const statusLabels: Record<Status, string> = { todo: 'To Do', progress: 'In Progress', done: 'Done' }
 
+const fetcher = (url: string) => fetch(url).then((response) => response.json())
+
 export default function Page() {
+  const { data: savedBoard, mutate } = useSWR('/api/board', fetcher)
   const [projects, setProjects] = useState(initialProjects)
   const [activeProject, setActiveProject] = useState(initialProjects[0])
   const [tasks, setTasks] = useState(initialTasks)
@@ -54,6 +49,27 @@ export default function Page() {
   const [dialogMode, setDialogMode] = useState<'task' | 'category' | 'remove-category'>('task')
   const [newDue, setNewDue] = useState('')
   const [showDue, setShowDue] = useState(false)
+  const hydrated = useRef(false)
+
+  useEffect(() => {
+    if (savedBoard === undefined || hydrated.current) return
+    const board = savedBoard ?? { projects: initialProjects, activeProject: initialProjects[0], tasks: initialTasks, categories: ['General', 'Content', 'Research', 'Development', 'Strategy'] }
+    setProjects(board.projects)
+    setActiveProject(board.activeProject)
+    setTasks(board.tasks)
+    setCategories(board.categories)
+    hydrated.current = true
+    if (!savedBoard) saveBoard(board)
+  }, [savedBoard])
+
+  const saveBoard = (next: { projects: string[]; activeProject: string; tasks: Task[]; categories: string[] }) => {
+    void fetch('/api/board', { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(next) }).then(() => mutate(next, false))
+  }
+
+  useEffect(() => {
+    if (!hydrated.current) return
+    saveBoard({ projects, activeProject, tasks, categories })
+  }, [projects, activeProject, tasks, categories])
 
   const visibleTasks = useMemo(() => tasks.filter((task) => {
     return task.project === activeProject &&
@@ -119,7 +135,7 @@ export default function Page() {
     <main className="flex min-h-screen justify-center bg-[#f5f2eb] text-[#252a27]">
       <section className="mx-auto flex w-full max-w-[1380px] flex-col items-stretch px-6 py-10 text-left sm:px-10 lg:px-10 xl:px-10">
         <header className="flex w-full flex-row items-start justify-between gap-3 text-left sm:items-center">
-          <div><h1 className="font-serif text-[42px] font-bold leading-none tracking-[-1.5px] sm:text-[48px]">TASKLANE</h1><p className="mt-3 text-[17px] text-[#4d5752]">{projectTasks.length} tasks · {overdueCount} overdue · {doneCount} done</p></div>
+          <div><h1 className="font-serif text-[42px] font-bold leading-none tracking-[-1.5px] sm:text-[48px]">TASKLANE</h1><p className="mt-3 flex flex-wrap items-center gap-2 text-[17px] font-semibold"><span className="text-[#2563eb]">{projectTasks.length} tasks</span><span aria-hidden="true">·</span><span className="text-[#dc2626]">{overdueCount} overdue tasks</span><span aria-hidden="true">·</span><span className="text-[#ca8a04]">{projectTasks.length - doneCount} pending</span><span aria-hidden="true">·</span><span className="text-[#16a34a]">{doneCount} done</span></p></div>
           <button onClick={() => setDialogOpen(true)} className="inline-flex w-fit items-center gap-2 rounded-[9px] bg-[#216656] px-6 py-4 text-[16px] font-bold text-white hover:bg-[#194e42]"><Plus size={17} strokeWidth={3} /> Add task</button>
         </header>
 
