@@ -23,8 +23,6 @@ type Task = {
 const initialProjects = ['Website Relaunch', 'Mobile App v2', 'Q4 Marketing']
 const people = ['AK', 'RM', 'SP']
 
-const initialTasks: Task[] = []
-
 const statusLabels: Record<Status, string> = { todo: 'To Do', progress: 'In Progress', done: 'Done' }
 
 const fetcher = (url: string) => fetch(url).then((response) => response.json())
@@ -33,7 +31,7 @@ export default function Page() {
   const { data: savedBoard, mutate } = useSWR('/api/board', fetcher)
   const [projects, setProjects] = useState(initialProjects)
   const [activeProject, setActiveProject] = useState(initialProjects[0])
-  const [tasks, setTasks] = useState(initialTasks)
+  const [tasks, setTasks] = useState<Task[]>([])
   const [projectDialogOpen, setProjectDialogOpen] = useState(false)
   const [newProjectName, setNewProjectName] = useState('')
   const [query, setQuery] = useState('')
@@ -53,7 +51,7 @@ export default function Page() {
 
   useEffect(() => {
     if (savedBoard === undefined || hydrated.current) return
-    const board = savedBoard ?? { projects: initialProjects, activeProject: initialProjects[0], tasks: initialTasks, categories: ['General', 'Content', 'Research', 'Development', 'Strategy'] }
+    const board = savedBoard ?? { projects: initialProjects, activeProject: initialProjects[0], tasks: [], categories: ['General', 'Content', 'Research', 'Development', 'Strategy'] }
     setProjects(board.projects)
     setActiveProject(board.activeProject)
     setTasks(board.tasks)
@@ -130,6 +128,10 @@ export default function Page() {
   const projectTasks = tasks.filter((task) => task.project === activeProject)
   const overdueCount = projectTasks.filter((task) => task.overdue).length
   const doneCount = projectTasks.filter((task) => task.status === 'done').length
+
+  if (savedBoard === undefined) {
+    return <main className="flex min-h-screen items-center justify-center bg-[#f5f2eb] text-[#252a27]"><p className="text-lg font-semibold">Loading tasks...</p></main>
+  }
 
   return (
     <main className="flex min-h-screen justify-center bg-[#f5f2eb] text-[#252a27]">
