@@ -21,6 +21,8 @@ type Task = {
 }
 
 const initialProjects = ['Website Relaunch', 'Mobile App v2', 'Q4 Marketing']
+
+const dateOnly = (value: string) => value.split('T')[0].split(' ')[0]
 const people = ['AK', 'RM', 'SP']
 
 const statusLabels: Record<Status, string> = { todo: 'To Do', progress: 'In Progress', done: 'Done' }
@@ -79,7 +81,7 @@ export default function Page() {
 
   const moveTask = (status: Status) => {
     if (dragged === null) return
-    setTasks((current) => current.map((task) => task.id === dragged ? { ...task, status, completed: status === 'done' ? 'Today' : undefined, completedTime: status === 'done' ? new Date().toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' }) : undefined } : task))
+    setTasks((current) => current.map((task) => task.id === dragged ? { ...task, status, completed: status === 'done' ? 'Today' : undefined, completedTime: undefined } : task))
     setDragged(null)
   }
 
@@ -121,7 +123,7 @@ export default function Page() {
     setNewTitle(task.title)
     setNewPriority(task.priority)
     setNewCategory(task.tag)
-    setNewDue(task.due)
+    setNewDue(dateOnly(task.due))
     setShowDue(Boolean(task.due))
   }
 
@@ -170,7 +172,7 @@ export default function Page() {
         <div className="mt-7 grid w-full min-w-0 items-stretch justify-start justify-items-stretch gap-6 xl:grid-cols-3">
           {(['todo', 'progress', 'done'] as Status[]).map((status) => {
             const columnTasks = visibleTasks.filter((task) => task.status === status)
-            return <section key={status} onDragOver={(event) => event.preventDefault()} onDrop={() => moveTask(status)} className="min-h-[530px] rounded-[17px] bg-[#ebe6da] p-5"><div className="mb-4 flex items-center justify-between"><h2 className="text-[16px] font-bold">{statusLabels[status]}</h2><span className="text-[16px] font-semibold text-[#4d5752]">{columnTasks.length}</span></div><div className="space-y-4">{columnTasks.map((task) => <article key={task.id} draggable onDragStart={() => setDragged(task.id)} className={`relative rounded-[15px] border border-[#ddd5c5] bg-white p-5 shadow-[0_1px_2px_rgba(30,30,20,.03)] ${status === 'done' ? 'bg-[#faf8f3]' : ''}`}><div className="absolute right-4 top-4 flex items-center gap-1">{status !== 'done' && <button type="button" aria-label={`Edit ${task.title}`} onClick={() => startEditingTask(task)} className="rounded-md px-2 py-1 text-xs font-semibold text-[#216656] hover:bg-[#dcebe5]">Edit</button>}{status === 'done' && <button type="button" aria-label={`Delete ${task.title}`} onClick={() => deleteTask(task.id)} className="rounded-md p-1 text-[#7a817c] hover:bg-[#f1ddd3] hover:text-[#a0440c]"><X size={16} /></button>}</div><h3 className={`text-[18px] font-bold leading-tight ${status === 'done' ? 'text-[#5b625e] line-through pr-6' : ''}`}>{task.title}</h3><div className="mt-4 flex items-center gap-2 text-[14px]"><span className={`rounded-full px-3 py-1 font-semibold ${task.priority === 'High' ? 'bg-[#f9ddcc] text-[#a0440c]' : task.priority === 'Medium' ? 'bg-[#f5ebbd] text-[#77600b]' : 'bg-[#dcebe5] text-[#286052]'}`}>{task.priority}</span>{status === 'done' ? <span className="text-[#4d5752]">Completed {task.completed}</span> : <span className={task.overdue ? 'font-semibold text-[#a0440c]' : 'text-[#4d5752]'}>{task.overdue && 'Overdue · '}{!task.overdue && 'Due '}{task.due}</span>}</div><div className="mt-5 text-[14px] text-[#4d5752]"><span>{task.tag}</span></div></article>)}</div></section>
+            return <section key={status} onDragOver={(event) => event.preventDefault()} onDrop={() => moveTask(status)} className="min-h-[530px] rounded-[17px] bg-[#ebe6da] p-5"><div className="mb-4 flex items-center justify-between"><h2 className="text-[16px] font-bold">{statusLabels[status]}</h2><span className="text-[16px] font-semibold text-[#4d5752]">{columnTasks.length}</span></div><div className="space-y-4">{columnTasks.map((task) => <article key={task.id} draggable onDragStart={() => setDragged(task.id)} className={`relative rounded-[15px] border border-[#ddd5c5] bg-white p-5 shadow-[0_1px_2px_rgba(30,30,20,.03)] ${status === 'done' ? 'bg-[#faf8f3]' : ''}`}><div className="absolute right-4 top-4 flex items-center gap-1">{status !== 'done' && <button type="button" aria-label={`Edit ${task.title}`} onClick={() => startEditingTask(task)} className="rounded-md px-2 py-1 text-xs font-semibold text-[#216656] hover:bg-[#dcebe5]">Edit</button>}{status === 'done' && <button type="button" aria-label={`Delete ${task.title}`} onClick={() => deleteTask(task.id)} className="rounded-md p-1 text-[#7a817c] hover:bg-[#f1ddd3] hover:text-[#a0440c]"><X size={16} /></button>}</div><h3 className={`text-[18px] font-bold leading-tight ${status === 'done' ? 'text-[#5b625e] line-through pr-6' : ''}`}>{task.title}</h3><div className="mt-4 flex items-center gap-2 text-[14px]"><span className={`rounded-full px-3 py-1 font-semibold ${task.priority === 'High' ? 'bg-[#f9ddcc] text-[#a0440c]' : task.priority === 'Medium' ? 'bg-[#f5ebbd] text-[#77600b]' : 'bg-[#dcebe5] text-[#286052]'}`}>{task.priority}</span>{status === 'done' ? <span className="text-[#4d5752]">Completed {task.completed}</span> : <span className={task.overdue ? 'font-semibold text-[#a0440c]' : 'text-[#4d5752]'}>{task.overdue && 'Overdue · '}{!task.overdue && 'Due '}{dateOnly(task.due)}</span>}</div><div className="mt-5 text-[14px] text-[#4d5752]"><span>{task.tag}</span></div></article>)}</div></section>
           })}
         </div>
       </section>
