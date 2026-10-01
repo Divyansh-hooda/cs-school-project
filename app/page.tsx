@@ -47,6 +47,7 @@ export default function Page() {
   const [dialogMode, setDialogMode] = useState<'task' | 'category' | 'remove-category'>('task')
   const [newDue, setNewDue] = useState('')
   const [showDue, setShowDue] = useState(false)
+  const [editingTaskId, setEditingTaskId] = useState<number | null>(null)
   const hydrated = useRef(false)
 
   useEffect(() => {
@@ -115,6 +116,25 @@ export default function Page() {
     setDialogMode('task')
   }
 
+  const startEditingTask = (task: Task) => {
+    setEditingTaskId(task.id)
+    setNewTitle(task.title)
+    setNewPriority(task.priority)
+    setNewCategory(task.tag)
+    setNewDue(task.due)
+    setShowDue(Boolean(task.due))
+  }
+
+  const updateTask = (event: React.FormEvent) => {
+    event.preventDefault()
+    if (editingTaskId === null || !newTitle.trim()) return
+    setTasks((current) => current.map((task) => task.id === editingTaskId ? { ...task, title: newTitle.trim(), priority: newPriority, tag: newCategory, due: newDue || task.due } : task))
+    setEditingTaskId(null)
+    setNewTitle('')
+    setNewDue('')
+    setShowDue(false)
+  }
+
   const addTask = (event: React.FormEvent) => {
     event.preventDefault()
     if (!newTitle.trim()) return
@@ -150,10 +170,12 @@ export default function Page() {
         <div className="mt-7 grid w-full min-w-0 items-stretch justify-start justify-items-stretch gap-6 xl:grid-cols-3">
           {(['todo', 'progress', 'done'] as Status[]).map((status) => {
             const columnTasks = visibleTasks.filter((task) => task.status === status)
-            return <section key={status} onDragOver={(event) => event.preventDefault()} onDrop={() => moveTask(status)} className="min-h-[530px] rounded-[17px] bg-[#ebe6da] p-5"><div className="mb-4 flex items-center justify-between"><h2 className="text-[16px] font-bold">{statusLabels[status]}</h2><span className="text-[16px] font-semibold text-[#4d5752]">{columnTasks.length}</span></div><div className="space-y-4">{columnTasks.map((task) => <article key={task.id} draggable onDragStart={() => setDragged(task.id)} className={`relative rounded-[15px] border border-[#ddd5c5] bg-white p-5 shadow-[0_1px_2px_rgba(30,30,20,.03)] ${status === 'done' ? 'bg-[#faf8f3]' : ''}`}>{status === 'done' && <button type="button" aria-label={`Delete ${task.title}`} onClick={() => deleteTask(task.id)} className="absolute right-4 top-4 rounded-md p-1 text-[#7a817c] hover:bg-[#f1ddd3] hover:text-[#a0440c]"><X size={16} /></button>}<h3 className={`text-[18px] font-bold leading-tight ${status === 'done' ? 'text-[#5b625e] line-through pr-6' : ''}`}>{task.title}</h3><div className="mt-4 flex items-center gap-2 text-[14px]"><span className={`rounded-full px-3 py-1 font-semibold ${task.priority === 'High' ? 'bg-[#f9ddcc] text-[#a0440c]' : task.priority === 'Medium' ? 'bg-[#f5ebbd] text-[#77600b]' : 'bg-[#dcebe5] text-[#286052]'}`}>{task.priority}</span>{status === 'done' ? <span className="text-[#4d5752]">Completed {task.completed}</span> : <span className={task.overdue ? 'font-semibold text-[#a0440c]' : 'text-[#4d5752]'}>{task.overdue && 'Overdue · '}{!task.overdue && 'Due '}{task.due}</span>}</div><div className="mt-5 text-[14px] text-[#4d5752]"><span>{task.tag}</span></div></article>)}</div></section>
+            return <section key={status} onDragOver={(event) => event.preventDefault()} onDrop={() => moveTask(status)} className="min-h-[530px] rounded-[17px] bg-[#ebe6da] p-5"><div className="mb-4 flex items-center justify-between"><h2 className="text-[16px] font-bold">{statusLabels[status]}</h2><span className="text-[16px] font-semibold text-[#4d5752]">{columnTasks.length}</span></div><div className="space-y-4">{columnTasks.map((task) => <article key={task.id} draggable onDragStart={() => setDragged(task.id)} className={`relative rounded-[15px] border border-[#ddd5c5] bg-white p-5 shadow-[0_1px_2px_rgba(30,30,20,.03)] ${status === 'done' ? 'bg-[#faf8f3]' : ''}`}><div className="absolute right-4 top-4 flex items-center gap-1">{status !== 'done' && <button type="button" aria-label={`Edit ${task.title}`} onClick={() => startEditingTask(task)} className="rounded-md px-2 py-1 text-xs font-semibold text-[#216656] hover:bg-[#dcebe5]">Edit</button>}{status === 'done' && <button type="button" aria-label={`Delete ${task.title}`} onClick={() => deleteTask(task.id)} className="rounded-md p-1 text-[#7a817c] hover:bg-[#f1ddd3] hover:text-[#a0440c]"><X size={16} /></button>}</div><h3 className={`text-[18px] font-bold leading-tight ${status === 'done' ? 'text-[#5b625e] line-through pr-6' : ''}`}>{task.title}</h3><div className="mt-4 flex items-center gap-2 text-[14px]"><span className={`rounded-full px-3 py-1 font-semibold ${task.priority === 'High' ? 'bg-[#f9ddcc] text-[#a0440c]' : task.priority === 'Medium' ? 'bg-[#f5ebbd] text-[#77600b]' : 'bg-[#dcebe5] text-[#286052]'}`}>{task.priority}</span>{status === 'done' ? <span className="text-[#4d5752]">Completed {task.completed}</span> : <span className={task.overdue ? 'font-semibold text-[#a0440c]' : 'text-[#4d5752]'}>{task.overdue && 'Overdue · '}{!task.overdue && 'Due '}{task.due}</span>}</div><div className="mt-5 text-[14px] text-[#4d5752]"><span>{task.tag}</span></div></article>)}</div></section>
           })}
         </div>
       </section>
+
+      {editingTaskId !== null && <div className="fixed inset-0 z-30 grid place-items-center bg-[#1f2522]/45 p-4" role="presentation" onMouseDown={(event) => event.target === event.currentTarget && setEditingTaskId(null)}><form onSubmit={updateTask} className="w-full max-w-[500px] rounded-2xl bg-[#fbfaf6] p-7 shadow-2xl"><div className="flex items-center justify-between"><h2 className="font-serif text-3xl font-bold">Edit task</h2><button type="button" aria-label="Close edit task dialog" onClick={() => setEditingTaskId(null)} className="rounded-full p-2 hover:bg-[#ebe6da]"><X size={20} /></button></div><label className="mt-6 block text-sm font-semibold">Task name<input autoFocus required value={newTitle} onChange={(event) => setNewTitle(event.target.value)} className="mt-2 h-12 w-full rounded-lg border border-[#d5cdbd] bg-white px-3 outline-none focus:border-[#216656]" /></label><div className="mt-4 grid grid-cols-2 gap-4"><label className="text-sm font-semibold">Priority<select value={newPriority} onChange={(event) => setNewPriority(event.target.value as Priority)} className="mt-2 h-12 w-full rounded-lg border border-[#d5cdbd] bg-white px-3 outline-none"><option>High</option><option>Medium</option><option>Low</option></select></label><label className="text-sm font-semibold">Due date<input value={newDue} onChange={(event) => setNewDue(event.target.value)} className="mt-2 h-12 w-full rounded-lg border border-[#d5cdbd] bg-white px-3 outline-none" /></label></div><label className="mt-4 block text-sm font-semibold">Category<select value={newCategory} onChange={(event) => setNewCategory(event.target.value)} className="mt-2 h-12 w-full rounded-lg border border-[#d5cdbd] bg-white px-3 outline-none">{categories.map((category) => <option key={category}>{category}</option>)}</select></label><button type="submit" className="mt-6 w-full rounded-lg bg-[#216656] py-3 font-bold text-white hover:bg-[#194e42]">Save changes</button></form></div>}
 
       {projectDialogOpen && <div className="fixed inset-0 z-20 grid place-items-center bg-[#1f2522]/45 p-4" role="presentation" onMouseDown={(event) => event.target === event.currentTarget && setProjectDialogOpen(false)}><form onSubmit={addProject} className="w-full max-w-[440px] rounded-2xl bg-[#fbfaf6] p-7 shadow-2xl"><div className="flex items-center justify-between"><h2 className="font-serif text-3xl font-bold">New project</h2><button type="button" aria-label="Close project dialog" onClick={() => setProjectDialogOpen(false)} className="rounded-full p-2 hover:bg-[#ebe6da]"><X size={20} /></button></div><label className="mt-6 block text-sm font-semibold">Project name<input autoFocus required value={newProjectName} onChange={(event) => setNewProjectName(event.target.value)} className="mt-2 h-12 w-full rounded-lg border border-[#d5cdbd] bg-white px-3 outline-none focus:border-[#216656]" placeholder="e.g. Product launch" /></label><button className="mt-6 w-full rounded-lg bg-[#216656] py-3 font-bold text-white hover:bg-[#194e42]">Create project</button></form></div>}
 
