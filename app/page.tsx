@@ -30,7 +30,7 @@ const statusLabels: Record<Status, string> = { todo: 'To Do', progress: 'In Prog
 const fetcher = (url: string) => fetch(url).then((response) => response.json())
 
 export default function Page() {
-  const { data: savedBoard, mutate } = useSWR('/api/board', fetcher)
+  const { data: savedBoard, error: boardError, mutate } = useSWR('/api/board', fetcher)
   const [projects, setProjects] = useState(initialProjects)
   const [activeProject, setActiveProject] = useState(initialProjects[0])
   const [tasks, setTasks] = useState<Task[]>([])
@@ -159,6 +159,10 @@ export default function Page() {
   const projectTasks = tasks.filter((task) => task.project === activeProject)
   const overdueCount = projectTasks.filter((task) => task.overdue).length
   const doneCount = projectTasks.filter((task) => task.status === 'done').length
+
+  if (boardError) {
+    return <main className="flex min-h-screen items-center justify-center bg-[#f5f2eb] px-6 text-[#252a27]"><div className="max-w-xl rounded-2xl bg-[#fbfaf6] p-8 text-center shadow-xl"><h1 className="font-serif text-3xl font-bold">Unable to load tasks</h1><p className="mt-3 text-[#4d5752]">Set DATABASE_URL in your local environment, create the tasklane_state table, then restart the dev server.</p><p className="mt-4 rounded-lg bg-[#f1ddd3] p-3 text-left text-sm text-[#873909]">{boardError.message}</p></div></main>
+  }
 
   if (savedBoard === undefined) {
     return <main className="flex min-h-screen items-center justify-center bg-[#f5f2eb] text-[#252a27]"><p className="text-lg font-semibold">Loading tasks...</p></main>
